@@ -8,17 +8,12 @@
 import SwiftUI
 
 struct QuizAppView: View {
-    let quiz = QuizModel.mock
-    
-    @State var currentQuestion: Question?
-    @State var selectedAnswer: String?
-    
-    init() {
-        _currentQuestion = State(initialValue: quiz.questions.first)
-    }
+    @State private var viewModel = QuizViewModel()
+    @State private var selectedAnswer: String?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(currentQuestion?.prompt ?? "")
+            Text(viewModel.currentQuestion.prompt)
                 .font(.title2)
                 .fontWeight(.semibold)
             
@@ -31,39 +26,37 @@ struct QuizAppView: View {
         .padding()
         
         VStack(alignment: .leading, spacing: 12) {
-            Text("Question 1 / 6")
+            Text("Question \(viewModel.currectQuestionIndex + 1) / \(viewModel.quiz.questions.count)")
                 .font(.subheadline)
                 .padding(.horizontal)
             Divider()
         }
         .padding(.bottom)
         
-        if let currentQuestion {
-            ForEach(currentQuestion.choices, id: \.self) { choice in
-                Button {
-                    self.selectedAnswer = choice
-                } label: {
-                    Text(choice)
-                        .padding(.horizontal)
-                        .font(.subheadline)
-                        .multilineTextAlignment(.leading)
-                        .foregroundStyle(.black)
-                        .frame(width: 360, height: 52, alignment: .leading)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(
-                                    selectedAnswer == choice ? .blue : .gray,
-                                    lineWidth: selectedAnswer == choice ? 3 : 1)
-                        }
-                }
-                
+        ForEach(viewModel.currentQuestion.choices, id: \.self) { choice in
+            Button {
+                self.selectedAnswer = choice
+            } label: {
+                Text(choice)
+                    .padding(.horizontal)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(.black)
+                    .frame(width: 360, height: 52, alignment: .leading)
+                    .clipShape(.rect(cornerRadius: 10))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(
+                                selectedAnswer == choice ? .blue : .gray,
+                                lineWidth: selectedAnswer == choice ? 3 : 1)
+                    }
             }
         }
         Spacer()
         
         Button {
-            
+            guard let selectedAnswer else {return}
+            viewModel.submitAnswer(selectedAnswer)
         } label: {
             Text("Submit")
                 .font(.headline)
