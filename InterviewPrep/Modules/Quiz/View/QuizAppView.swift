@@ -100,5 +100,11 @@ struct QuizAppView: View {
  Architecture:
  MVVM
  
+ Follow Up questions
+ 
+ 1. How could you improve the use of setting the view model on the environment?
+ 2. What would you have done if we dodn't have access to @Observable macro?
+ 3. What would it look like to fetch quiz from an API?
+ 4. How could we have multiple quizzes?
  
  */
