@@ -17,7 +17,6 @@ class ProductsViewModel {
     }
     
     func fetchProducts() async {
-        print("DEBUG: fetching products...")
         do {
             let products = try await service.fetchProducts()
             self.loadingState = products.isEmpty ? .empty : .completed(data: products)
