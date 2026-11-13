@@ -9,18 +9,20 @@ import Foundation
 
 @Observable
 class ProductsViewModel {
-    private let service: ProductServiceProtocol
-    var products: [Product]
+    let service: ProductServiceProtocol
+    var loadingState: ContentLoadingState<Product> = .loading
     
     init(service: ProductServiceProtocol = ProductService()) {
-        self.products = Product.mockProducts
         self.service = service
     }
     
     func fetchProducts() async {
+        print("DEBUG: fetching products...")
         do {
-            self.products = try await service.fetchProducts()
+            let products = try await service.fetchProducts()
+            self.loadingState = products.isEmpty ? .empty : .completed(data: products)
         } catch {
+            self.loadingState = .error(error: error)
             print("DEBUG: Failed fetch product with error: \(error)")
         }
     }
