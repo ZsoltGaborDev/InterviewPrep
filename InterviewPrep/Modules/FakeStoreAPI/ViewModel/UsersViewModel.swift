@@ -21,7 +21,12 @@ class UsersViewModel {
     func fetchUsers() async {
         do {
             let users = try await service.fetchUsers()
+            try Task.checkCancellation()
             self.loadingState = users.isEmpty ? .empty : .completed(data: users)
+        } catch is CancellationError {
+            // SwiftUI cancels the task when this view disappears.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession reports task cancellation as URLError.cancelled.
         } catch {
             self.loadingState = .error(error: error)
             print("DEBUG: Failed fetch users with error: \(error)")

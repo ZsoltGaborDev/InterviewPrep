@@ -8,18 +8,28 @@
 import SwiftUI
 
 struct FakeStoreTabView: View {
+    private enum StoreTab: Hashable {
+        case products
+        case users
+    }
+
+    @State private var selectedTab: StoreTab = .products
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             ProductsView()
                 .tabItem {
                     Label("Products", systemImage: "cart")
                 }
+                .tag(StoreTab.products)
+            
             Spacer()
             
             UsersView()
                 .tabItem {
                     Label("Users", systemImage:"person")
                 }
+                .tag(StoreTab.users)
         }
     }
 }

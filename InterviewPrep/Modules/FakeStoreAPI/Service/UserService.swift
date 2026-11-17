@@ -13,7 +13,9 @@ protocol UserSeviceProtocol {
 
 struct UserService: UserSeviceProtocol {
     private let downloader: HTTPDataDownloaderProtocol
+    private let cache = CacheManager(filename: "users.json")
     private var lastFetchedTime: Date?
+    private let refreshInterval: TimeInterval = 60 * 10 // 10 minutes
     
     init(downloader: HTTPDataDownloaderProtocol = HTTPDataDownloader()) {
         self.downloader = downloader
@@ -21,9 +23,20 @@ struct UserService: UserSeviceProtocol {
     }
     
     func fetchUsers() async throws -> [User] {
+        if !needRefresh {
+            print("Got users from cache..")
+            return try cache.getData(as: User.self)
+        }
+        print("Got users from API..")
         let users = try await downloader.fetchData(as: User.self, from: .users)
         saveLastFechedTime()
+        cache.saveData(users)
         return users
+    }
+    
+    private var needRefresh: Bool {
+        guard let lastFetchedTime else { return true }
+        return Date().timeIntervalSince(lastFetchedTime) >= refreshInterval
     }
     
     private func saveLastFechedTime() {

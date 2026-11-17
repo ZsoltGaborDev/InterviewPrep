@@ -11,7 +11,7 @@ struct ProductsView: View {
     @State private var viewModel = ProductsViewModel()
     
     var body: some View {
-        Group {
+        VStack {
             switch viewModel.loadingState {
             case .loading:
                 ProgressView()

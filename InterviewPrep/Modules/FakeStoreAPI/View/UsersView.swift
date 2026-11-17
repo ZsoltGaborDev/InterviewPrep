@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct UsersView: View {
-    @State var viewModel = UsersViewModel()
+    @State private var viewModel = UsersViewModel()
     
     var body: some View {
-        Group {
+        VStack {
             switch viewModel.loadingState {
             case .loading:
                 ProgressView()
