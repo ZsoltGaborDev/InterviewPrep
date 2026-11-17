@@ -12,40 +12,14 @@ protocol ProductServiceProtocol {
 }
 
 class ProductService: ProductServiceProtocol {
-    private let urlString = "https://fakestoreapi.com/products"
     private let downloader: HTTPDataDownloaderProtocol
-    private let cache = CacheManager(filename: "products.json")
-    private let refreshInterval: TimeInterval = 60 * 10 // 10 minutes
-    private var lastFetchedTime: Date?
     
-    init(downloader: HTTPDataDownloaderProtocol = HTTPDataDownloader()) {
+    init(downloader: HTTPDataDownloaderProtocol = HTTPDataDownloader(endpoint: .products, cache: CacheManager(filename: "products.json"))) {
         self.downloader = downloader
-        self.getLastFetchedTime()
-    }
-    
-    private var needRefresh: Bool {
-        guard let lastFetchedTime else { return true }
-        return Date().timeIntervalSince(lastFetchedTime) >= refreshInterval
     }
     
     func fetchProducts() async throws -> [Product] {
-        if !needRefresh {
-            return try cache.getData(as: Product.self)
-        }
-        
-        let products = try await downloader.fetchData(as: Product.self, from: .products)
-        
-        saveLastFechedTime()
-        cache.saveData(products)
-        return products
-    }
-    
-    private func saveLastFechedTime() {
-        UserDefaults.standard.set(Date(), forKey: "lastFechedTime")
-    }
-    
-    private func getLastFetchedTime() {
-        self.lastFetchedTime = UserDefaults.standard.value(forKey: "lastFechedTime") as? Date
+        return try await downloader.fetchData(as: Product.self)
     }
 }
 

@@ -8,23 +8,47 @@
 import Foundation
 
 protocol HTTPDataDownloaderProtocol {
-    func fetchData<T: Codable>(as type: T.Type, from endpoint: FakeStoreAPIEndpoint) async throws -> [T]
+    func fetchData<T: Codable>(as type: T.Type) async throws -> [T]
 }
 
-struct HTTPDataDownloader: HTTPDataDownloaderProtocol {
+class HTTPDataDownloader: HTTPDataDownloaderProtocol {
     private let baseURL = "https://fakestoreapi.com"
+    private let cache: CacheManager?
+    private let endpoint: FakeStoreAPIEndpoint
+    private var lastFetchedTime: Date?
+    private let refreshInterval: TimeInterval = 60 * 10 // 10 minutes
+    private let userDefaultsLastFetchedTimeKey: String
     
-    func fetchData<T: Codable>(as type: T.Type, from endpoint: FakeStoreAPIEndpoint) async throws -> [T] {
-        let url = try buildURL(endpoint: endpoint)
+    init(endpoint: FakeStoreAPIEndpoint, cache: CacheManager? = nil) {
+        self.endpoint = endpoint
+        self.cache = cache
+        
+        self.userDefaultsLastFetchedTimeKey = endpoint.path
+        getLastFetchedTime()
+    }
+    
+    func fetchData<T: Codable>(as type: T.Type) async throws -> [T] {
+        if !needRefresh, let cache {
+            print("Got data from cache")
+            return try cache.getData(as: type)
+        }
+        print("Got data from API")
+        let url = try buildURL()
         
         let (data, response) = try await URLSession.shared.data(from: url)
         try validateResponse(response)
         
         let result = try JSONDecoder().decode([T].self, from: data)
+        
+        if let cache {
+            saveLastFechedTime()
+            cache.saveData(result)
+        }
+        
         return result
     }
     
-    func buildURL(endpoint: FakeStoreAPIEndpoint) throws -> URL {
+    func buildURL() throws -> URL {
         guard var components = URLComponents(string: baseURL) else { throw APIError.invalidURL }
         components.path = endpoint.path
         
@@ -40,6 +64,19 @@ struct HTTPDataDownloader: HTTPDataDownloaderProtocol {
         guard httpResponse.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
+    }
+    
+    private var needRefresh: Bool {
+        guard let lastFetchedTime else { return true }
+        return Date().timeIntervalSince(lastFetchedTime) >= refreshInterval
+    }
+    
+    private func saveLastFechedTime() {
+        UserDefaults.standard.set(Date(), forKey: userDefaultsLastFetchedTimeKey)
+    }
+
+    private func getLastFetchedTime() {
+        self.lastFetchedTime = UserDefaults.standard.value(forKey: userDefaultsLastFetchedTimeKey) as? Date
     }
 }
 

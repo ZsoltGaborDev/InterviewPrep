@@ -15,6 +15,7 @@ protocol CacheManagerProtocol {
     var filename: String { get }
 }
 
+
 struct CacheManager: CacheManagerProtocol {
     let filename: String
     
