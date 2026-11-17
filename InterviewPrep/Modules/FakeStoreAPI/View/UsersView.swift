@@ -11,19 +11,33 @@ struct UsersView: View {
     @State var viewModel = UsersViewModel()
     
     var body: some View {
-        List {
-            ForEach(viewModel.users) { user in
-                HStack(spacing: 16) {
-                    Text("\(user.id)")
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        /*@START_MENU_TOKEN@*/Text(user.username)/*@END_MENU_TOKEN@*/
-                        Text(user.email)
-                            .foregroundStyle(.gray)
+        Group {
+            switch viewModel.loadingState {
+            case .loading:
+                ProgressView()
+            case .empty:
+                ContentUnavailableView("No users", image: "person")
+            case .error(let error):
+                Text(error.localizedDescription)
+            case .completed(let users):
+                List {
+                    ForEach(users) { user in
+                        HStack(spacing: 16) {
+                            Text("\(user.id)")
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                /*@START_MENU_TOKEN@*/Text(user.username)/*@END_MENU_TOKEN@*/
+                                Text(user.email)
+                                    .foregroundStyle(.gray)
+                            }
+                        }
+                        .font(.subheadline)
                     }
                 }
-                .font(.subheadline)
             }
+        }
+        .task {
+            await viewModel.fetchUsers()
         }
     }
 }
