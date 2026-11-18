@@ -21,26 +21,26 @@ import Foundation
   - Ensure cached data persist between app launches
  
  Data to be displayed:
-  - Usa a tab view to display list of prodcts and users
+  - Usa a tab view to display list of prodcts and users✅
   - Products
-    - Image, title and description
-    - Description should be limited to two lines
+    - Image, title and description✅
+    - Description should be limited to two lines✅
   - Users
-    - First and last name
-    - email
+    - First and last name✅
+    - email✅
  
  Functionality:
-  - Fetch data for products (/products) and users (/users).
-  - Automatically refresh data when cache expires
+  - Fetch data for products (/products) and users (/users).✅
+  - Automatically refresh data when cache expires.(10 minutes) ✅
   - Pull to refresh functionality that invalidates cache and refreshes data
-  - Implement error handling
+  - Implement error handling ✅
   - List should be searchable
   - This API does not support pagination, but should add pseudo code with comments or print statements to implement it
  
  UI behaviour:
-  - Show a loading indicator while data is being fetched.
-  - Display an error message if the data fetch fails.
-  - Update the UI with fetched data or fallback to cached data if available.
+  - Show a loading indicator while data is being fetched.✅
+  - Display an error message if the data fetch fails.✅
+  - Update the UI with fetched data or fallback to cached data if available.✅
  
  Expectations:
   - Follow SOLID principles to ensure your code is modular and extensible.
